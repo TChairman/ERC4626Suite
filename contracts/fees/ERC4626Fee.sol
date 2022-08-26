@@ -16,16 +16,24 @@ import "../access/ERC4626BasicAccess.sol";
 abstract contract ERC4626Fee is ERC4626BasicAccess {
     using Math for uint256;
 
+    // Constants / immutables
     uint32 constant BPS_MULTIPLE = 10000;
     uint32 public immutable annualFeeBPS;
     uint32 public immutable carryFeeBPS;
     uint32 public immutable withdrawFeeBPS;
     bool public immutable disableDicretionaryFee;
     bool public immutable disableFeeAdvance;
+
+    // Variables
     mapping (address => uint256) private _basis;
     uint256 public totalBasis;
     int256 public accruedFees; // may be negative if fee advances are made
-    uint256 lastAnnualFeeAccrual;
+    uint256 internal lastAnnualFeeAccrual;
+
+    // Events
+    event discretionaryFeeEvent(int256 amount, string reason);
+    event drawFeeEvent(address to, uint256 amount);
+    event repayFeeEvent(address from, uint256 amountn);
 
     constructor(uint32 _annualFeeBPS, uint32 _carryFeeBPS, uint32 _withdrawFeeBPS, bool _disableDiscretionaryFee, bool _disableFeeAdvance) {
         require(_annualFeeBPS < 10000, "Annual Fee must be less than 100%");
@@ -66,6 +74,29 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
             totalBasis += uint256(change);
         }
     }
+
+    // amount could be negative to correct errors
+    function recordDiscretionaryFee (int256 amount, string memory reason) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(!disableDicretionaryFee, "Discretionary fees disabled");
+        accrueFee(amount);
+        emit discretionaryFeeEvent(amount, reason);
+    }
+
+    // can draw more than accrued if advances allowed
+    function drawFee (address to, uint256 amount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+        updateAnnualFee();
+        require(!disableFeeAdvance || (toInt256(amount) <= accruedFees), "Advancing fees disabled");
+        accrueFee(-toInt256(amount));
+        require(IERC20(asset()).transfer(to, amount), "drawFee: Transfer failed");
+        emit drawFeeEvent(to, amount);
+    }
+
+    // seems a little silly, but important for accounting
+    function repayFee (address from, uint256 amount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(IERC20(asset()).transferFrom(from, address(this), amount), "repayFee: Transfer failed");
+        accrueFee(toInt256(amount));
+        emit repayFeeEvent(from, amount);
+     }
 
     // Functions overridden from ERC4626
 
