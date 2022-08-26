@@ -60,7 +60,7 @@ Run the tests:
 $ npx hardhat test
 ```
 
-### Deploy contract to netowrk (requires private key and Alchemy API key)
+### Deploy contract to network (requires private key and Alchemy API key)
 
 ```
 npx hardhat run --network goerli ./scripts/deploy.ts
