@@ -3,6 +3,7 @@
 A full-featured and composable suite of extensions built on the [ERC4626](https://erc4626.info) standard.
 * [Acccess controls]() include local and global whitelists, integration with popular KYC standards, and global enabling and disabling of deposits, withdraws, and transfers
 * [Fee calculations]() include annual fees, withdraw fees, and carry on gains, as well as simple one-time expenses. Fees can be accrued and advanced.
+* More (including fund management, coupons, and transhing) coming soon!
 
 NOT (YET) AUDITED. USE AT YOUR OWN RISK.
 
