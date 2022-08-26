@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-import "../access/ERC4626BasicAccess.sol";
+import "../access/ERC4626Access.sol";
 
 /// @notice ERC4626 tokenized Vault implementation with annual, carry, and withdraw fees
 /// @notice Derived from ERC4626BasicAccess to allow for fee accrual and management
