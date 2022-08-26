@@ -5,7 +5,6 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../fees/ERC4626BasicFee.sol";
 
 /// @notice Vault instantiation for testing
-/// @author CareWater (https://github.com/CareWater333/ERC4626WithdrawFee)
 
 contract MockBasicFee is ERC4626BasicFee {
     constructor(

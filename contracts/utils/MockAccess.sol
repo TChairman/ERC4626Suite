@@ -5,7 +5,6 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../access/ERC4626Access.sol";
 
 /// @notice Vault instantiation for testing
-/// @author CareWater (https://github.com/CareWater333/ERC4626WithdrawFee)
 
 contract MockAccess is ERC4626Access {
     
