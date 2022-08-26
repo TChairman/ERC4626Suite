@@ -14,7 +14,15 @@ const GOERLI_URL = process.env.GOERLI_URL ? process.env.GOERLI_URL : "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ? process.env.ETHERSCAN_API_KEY : "";
 
 module.exports = {
-  solidity: "0.8.9",
+  solidity: {
+    version: "0.8.9",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks: {
     goerli: {
       url: GOERLI_URL,
