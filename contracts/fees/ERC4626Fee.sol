@@ -2,22 +2,20 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-import "../access/ERC4626Access.sol";
+import "../ERC4626SuiteContext.sol";
+import "./ERC4626ProtocolFeeConfig.sol";
 
 /// @notice ERC4626 tokenized Vault implementation with annual, carry, and withdraw fees
-/// @notice Derived from ERC4626BasicAccess to allow for fee accrual and management
 /// @notice based on OpenZeppelin v4.7 (token/ERC20/extensions/ERC4626.sol)
 
-// TODO consider making this clonable and therefore initializable
-// When using Fee contracts as a base, make sure your totalAssets implementation uses availableAssets() instead of balanceOf(this) to account for accrued fees
+
 // Test to make sure this works when fee accrual exceeds free token balance, this may be common
 
 
-abstract contract ERC4626Fee is ERC4626BasicAccess {
+abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
     using Math for uint256;
 
     // Constants / immutables
-    uint32 constant BPS_MULTIPLE = 10000;
     uint32 public immutable annualFeeBPS;
     uint32 public immutable carryFeeBPS;
     uint32 public immutable withdrawFeeBPS;
@@ -25,8 +23,10 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
     bool public immutable disableFeeAdvance;
 
     // Variables
-    mapping (address => uint256) private _basis;
-    uint256 public totalBasis;
+    mapping (address => uint256) private _paidIn;
+    mapping (address => uint256) private _paidOut;
+    uint256 public totalPaidIn;
+    uint256 public totalPaidOut;
     int256 public accruedFees; // may be negative if fee advances are made
     uint256 internal lastAnnualFeeAccrual;
 
@@ -36,54 +36,61 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
     event repayFeeEvent(address from, uint256 amountn);
 
     constructor(uint32 _annualFeeBPS, uint32 _carryFeeBPS, uint32 _withdrawFeeBPS, bool _disableDiscretionaryFee, bool _disableFeeAdvance) {
-        require(_annualFeeBPS < 10000, "Annual Fee must be less than 100%");
-        annualFeeBPS = _annualFeeBPS;
-        require(_carryFeeBPS < 10000, "Carry Fee must be less than 100%");
-        carryFeeBPS = _carryFeeBPS;
-        require(_withdrawFeeBPS < 10000, "Withdraw Fee must be less than 100%");
-        withdrawFeeBPS = _withdrawFeeBPS;
-        disableDicretionaryFee = _disableDiscretionaryFee;
+        require(_annualFeeBPS + protocolAnnualFeeBPS < 10000, "Annual Fee must be less than 100%");
+        annualFeeBPS = _annualFeeBPS + protocolAnnualFeeBPS;
+        require(_carryFeeBPS + protocolCarryFeeBPS < 10000, "Carry Fee must be less than 100%");
+        carryFeeBPS = _carryFeeBPS + protocolCarryFeeBPS;
+        require(_withdrawFeeBPS + protoocolWithdrawFeeBPS < 10000, "Withdraw Fee must be less than 100%");
+        withdrawFeeBPS = _withdrawFeeBPS + protoocolWithdrawFeeBPS;
+        disableDicretionaryFee = _disableDiscretionaryFee ;
         disableFeeAdvance = _disableFeeAdvance;
     }
 
-    // use this in totalAssets() instead of asset.balanceOf(this)
-    function availableAssets() public virtual view returns (int256 avail) {
-        avail = toInt256(IERC20(asset()).balanceOf(address(this))) - accruedFees - toInt256(accruedAnnualFee());
+    function totalAssets() public view virtual override returns (uint256 assets) {
+        int256 fees = totalAccruedFees();
+        assets = super.totalAssets();
+        if (fees < 0) {
+            assets += uint256(-fees);
+        } else if (assets < uint256(fees)) {
+            assets -= uint256(fees);
+        } else {
+            assets = 0;
+        }
     }
 
     function accrueFee(int256 fee) internal virtual {
         accruedFees += fee;
     }
 
-    function accruedAnnualFee() public virtual view returns (uint256) {
-        return totalBasis.mulDiv(annualFeeBPS, BPS_MULTIPLE, Math.Rounding.Up).mulDiv(block.timestamp - lastAnnualFeeAccrual, 365 days);
+    function splitAndAccrueFee(uint256 fee, uint32 feeTotalBPS, uint32 protocolBPS) internal virtual {
+        if (feeTotalBPS == 0) return;
+        uint256 protocolFee = fee.mulDiv(protocolBPS, feeTotalBPS);
+        require(IERC20(asset()).transfer(protocolTreasury, protocolFee), "splitAndAccrueFee: Transfer failed");
+        accrueFee(toInt256(fee - protocolFee));
     }
 
-    // do this every time totalBasis is updated, e.g. in deposit and withdraw
+    function accruedAnnualFee() public virtual view returns (uint256) {
+        return totalPaidIn.mulDiv(annualFeeBPS, BPS_MULTIPLE, Math.Rounding.Down).mulDiv(block.timestamp - lastAnnualFeeAccrual, 365 days);
+    }
+
+    function totalAccruedFees() public virtual view returns (int256) {
+        return accruedFees + toInt256(accruedAnnualFee());
+    }
+
     function updateAnnualFee() public virtual {
-        accrueFee(toInt256(accruedAnnualFee()));
+        splitAndAccrueFee(accruedAnnualFee(), annualFeeBPS, protocolAnnualFeeBPS);
         lastAnnualFeeAccrual = block.timestamp;
     }
 
-    function updateTotalBasis(int256 change) internal virtual {
-        updateAnnualFee();
-        if (change < 0) { // protect the casts to uint
-            require(uint256(-change) <= totalBasis, "totalBasis can't go negative");
-            totalBasis -= uint256(-change);
-        } else {
-            totalBasis += uint256(change);
-        }
-    }
-
     // amount could be negative to correct errors
-    function recordDiscretionaryFee (int256 amount, string memory reason) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    function recordDiscretionaryFee (int256 amount, string memory reason) public virtual onlyManager {
         require(!disableDicretionaryFee, "Discretionary fees disabled");
         accrueFee(amount);
         emit discretionaryFeeEvent(amount, reason);
     }
 
     // can draw more than accrued if advances allowed
-    function drawFee (address to, uint256 amount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    function drawFee (address to, uint256 amount) public virtual onlyManager {
         updateAnnualFee();
         require(!disableFeeAdvance || (toInt256(amount) <= accruedFees), "Advancing fees disabled");
         accrueFee(-toInt256(amount));
@@ -92,7 +99,7 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
     }
 
     // seems a little silly, but important for accounting
-    function repayFee (address from, uint256 amount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    function repayFee (address from, uint256 amount) public virtual onlyManager {
         require(IERC20(asset()).transferFrom(from, address(this), amount), "repayFee: Transfer failed");
         accrueFee(toInt256(amount));
         emit repayFeeEvent(from, amount);
@@ -108,7 +115,7 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
         override
         returns (uint256 assets)
     {
-        (assets, ) = _convertToAssetsOwner(balanceOf(owner), owner);
+        (assets, , ) = _convertToAssetsNetFees(balanceOf(owner), owner);
     }
 
     /** @dev See {IERC4626-withdraw}. */
@@ -119,10 +126,11 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
     ) public virtual override returns (uint256) {
         require(assets <= maxWithdraw(owner), "ERC4626: withdraw more than max");
 
-        (uint256 shares, int256 feeAmount) = _convertToSharesOwner(assets, owner);
+        (uint256 shares, uint256 withdrawFee, uint256 carryFee) = _convertToSharesNetFees(assets, owner);
         _withdraw(_msgSender(), receiver, owner, assets, shares);
-        accrueFee(feeAmount);
-
+        splitAndAccrueFee(withdrawFee, protoocolWithdrawFeeBPS, withdrawFeeBPS);
+        splitAndAccrueFee(carryFee, protocolCarryFeeBPS, carryFeeBPS);
+        
         return shares;
     }
 
@@ -134,80 +142,47 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
     ) public virtual override returns (uint256) {
         require(shares <= maxRedeem(owner), "ERC4626: redeem more than max");
 
-        (uint256 assets, int256 feeAmount) = _convertToAssetsOwner(shares, owner);
+        (uint256 assets, uint256 withdrawFee, uint256 carryFee) = _convertToAssetsNetFees(shares, owner);
         _withdraw(_msgSender(), receiver, owner, assets, shares);
-        accrueFee(feeAmount);
+        splitAndAccrueFee(withdrawFee, protoocolWithdrawFeeBPS, withdrawFeeBPS);
+        splitAndAccrueFee(carryFee, protocolCarryFeeBPS, carryFeeBPS);
 
         return assets;
     }
 
-    function netAssets(address owner) public virtual view returns (uint256 assets, uint256 fees) {
-        uint256 totalSup = totalSupply();
-        if (totalSup == 0) return (0,0);
-        assets = balanceOf(owner).mulDiv(totalAssets(), totalSup); // what owner would have with only annual fees accrued
-        fees = 0;
+    function netAssets(address owner) public virtual view returns (uint256 assets, uint256 withdrawFee, uint256 carryFee) {
+        uint256 availSup = availableSupply();
+        if (availSup == 0) return (0,0,0);
+        assets = balanceOf(owner).mulDiv(totalAssets(), availSup); // what owner would have with only annual fees accrued
 
         // calculate carry fee
         if (carryFeeBPS > 0) {
-            int256 gainLoss = toInt256(assets) - toInt256(_basis[owner]);
+            int256 gainLoss = toInt256(assets + _paidOut[owner]) - toInt256(_paidIn[owner]);
             if (gainLoss > 0) { // unsafe cast below is okay because we check for > 0 here
-                fees += uint256(gainLoss).mulDiv(carryFeeBPS, BPS_MULTIPLE, Math.Rounding.Up);
-                assets -= fees;
+                carryFee = uint256(gainLoss).mulDiv(carryFeeBPS, BPS_MULTIPLE, Math.Rounding.Up);
+                assets -= carryFee;
             }
         }
 
         // calculate withdraw fee
         if (withdrawFeeBPS > 0) {
-            uint256 wFee = assets.mulDiv(withdrawFeeBPS, BPS_MULTIPLE, Math.Rounding.Up);
-            fees += wFee;
-            assets -= wFee;
+            withdrawFee = assets.mulDiv(withdrawFeeBPS, BPS_MULTIPLE, Math.Rounding.Up);
+            assets -= withdrawFee;
         }
     }
-
-    function _convertToSharesOwner(uint256 assets, address owner) internal view virtual returns (uint256 shares, int256 fees) {
-        (uint256 netAss, uint256 netFee) = netAssets(owner);
+    
+    function _convertToSharesNetFees(uint256 assets, address owner) internal view virtual returns (uint256 shares, uint256 withdrawFee, uint256 carryFee) {
+        (uint256 netAss, uint256 netWithdrawFee, uint256 netCarryFee) = netAssets(owner);
         shares = balanceOf(owner).mulDiv(assets, netAss, Math.Rounding.Up);
-        fees = toInt256(netFee.mulDiv(assets, netAss, Math.Rounding.Up));
+        withdrawFee = netWithdrawFee.mulDiv(assets, netAss, Math.Rounding.Down);
+        carryFee = netCarryFee.mulDiv(assets, netAss, Math.Rounding.Down);
     }
 
-    function _convertToAssetsOwner(uint256 shares, address owner) internal view virtual returns (uint256 assets, int256 fees) {
-        (uint256 netAss, uint256 netFee) = netAssets(owner);
-        assets = netAss.mulDiv(shares, balanceOf(owner), Math.Rounding.Up);
-        fees = toInt256(netFee.mulDiv(shares, balanceOf(owner), Math.Rounding.Up));
-    }
-
-     /**
-     * @dev Internal conversion function (from assets to shares) with support for rounding direction.
-     * Copied from OpenZeppelin and updated to include withdraw fee.
-     *
-     * Will revert if assets > 0, totalSupply > 0 and totalAssets = 0. That corresponds to a case where any asset
-     * would represent an infinite amount of shares.
-     */
-    function _convertToShares(uint256 assets, Math.Rounding rounding) internal view virtual override returns (uint256 shares) {
-        uint256 totalSup = totalSupply();
-        uint256 totalAss = totalAssets().mulDiv(BPS_MULTIPLE - withdrawFeeBPS, BPS_MULTIPLE, Math.Rounding.Down);
-        return
-            (assets == 0 || totalAss == 0)
-                ? assets.mulDiv(10**decimals(), 10**IERC20Metadata(asset()).decimals(), rounding)
-                : assets.mulDiv(totalSup, totalAss, rounding);
-    }
-
-    /**
-     * @dev Internal conversion function (from shares to assets) with support for rounding direction.
-     * Copied from OpenZeppelin and updated to include withdraw fee.
-     */
-    function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256 assets) {
-        uint256 totalSup = totalSupply();
-        uint256 totalAss = totalAssets().mulDiv(BPS_MULTIPLE - withdrawFeeBPS, BPS_MULTIPLE, Math.Rounding.Down);
-        return
-            (totalSup == 0)
-                ? shares.mulDiv(10**IERC20Metadata(asset()).decimals(), 10**decimals(), rounding)
-                : shares.mulDiv(totalAss, totalSup, rounding);
-    }
-
-    function _basisPercent (address owner, uint256 shares) internal virtual returns (uint256 assets) {
-        assets = _basis[owner].mulDiv(shares, balanceOf(owner), Math.Rounding.Up);
-        if (assets > _basis[owner]) assets = _basis[owner];
+    function _convertToAssetsNetFees(uint256 shares, address owner) internal view virtual returns (uint256 assets, uint256 withdrawFee, uint256 carryFee) {
+        (uint256 netAss, uint256 netWithdrawFee, uint256 netCarryFee) = netAssets(owner);
+        assets = netAss.mulDiv(shares, balanceOf(owner), Math.Rounding.Down);
+        withdrawFee = netWithdrawFee.mulDiv(assets, netAss, Math.Rounding.Down);
+        carryFee = netCarryFee.mulDiv(assets, netAss, Math.Rounding.Down);
     }
 
     // following 3 functions MUST call super to make sure they don't override access control
@@ -217,8 +192,8 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
         uint256 assets,
         uint256 shares
     ) internal virtual override {
-        _basis[receiver] += assets;
-        updateTotalBasis(toInt256(assets));
+        _paidIn[receiver] += assets;
+        totalPaidIn += assets;
         super._deposit(caller, receiver, assets, shares);
     }
 
@@ -229,25 +204,26 @@ abstract contract ERC4626Fee is ERC4626BasicAccess {
         uint256 assets,
         uint256 shares
     ) internal virtual override {
-        uint256 basis = _basisPercent(owner, shares);
-        _basis[owner] -= basis;
-        updateTotalBasis(-toInt256(basis));
+        _paidOut[owner] += assets;
+        totalPaidOut += assets;
         super._withdraw(caller, receiver, owner, assets, shares);
     }
 
     function _transfer(
         address from,
         address to,
-        uint256 amount
+        uint256 shares
     ) internal virtual override {
-        uint256 basis = _basisPercent(from, amount);
-        _basis[from] -= basis;
-        _basis[to] += basis;
-        super._transfer(from, to, amount);
+        (uint256 assets, uint256 withdrawFee, uint256 carryFee) = _convertToAssetsNetFees(shares, from);
+        splitAndAccrueFee(withdrawFee, protoocolWithdrawFeeBPS, withdrawFeeBPS);
+        splitAndAccrueFee(carryFee, protocolCarryFeeBPS, carryFeeBPS);
+        _paidOut[from] += assets; // TODO fix this - doesn't update totalPaidIn, but does it matter?
+        _paidIn[to] += assets;
+        super._transfer(from, to, shares);
     }
 
     // copied from OpenZeppelin SafeCast - didn't want the whole library
-    function toInt256(uint256 value) internal pure returns (int256) {
+    function toInt256(uint256 value) private pure returns (int256) {
         // Note: Unsafe cast below is okay because `type(int256).max` is guaranteed to be positive
         require(value <= uint256(type(int256).max), "SafeCast: value doesn't fit in an int256");
         return int256(value);

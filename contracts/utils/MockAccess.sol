@@ -9,7 +9,7 @@ import "../access/ERC4626Access.sol";
 contract MockAccess is ERC4626Access {
     
     constructor(
-        ERC20 _asset,
+        IERC20Metadata _asset,
         string memory _name,
         string memory _symbol
     ) ERC4626(_asset) ERC20(_name, _symbol) {}

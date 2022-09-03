@@ -12,17 +12,17 @@ We also support the ability to take one-time fees (such as fund formation expens
 
 Fees can be accrued and drawn when needed, and even repaid (for example, in the case of an advance).
 
-## ERC 4626 Basic Fee
-
-The Basic Fee implements simple fees on withdrawal. Fees are paid immediately upon withdrawal to the treasury address. There is no fee accrual, fee advancement, or one-time fees.
-
-This the simplest and most gas-efficient solution, as it does not require any per-investor accounting. Simply specify the treasury address and fee in BPS in the constructor, and you're good to go.
-
 ## ERC 4626 Fee
 
 Real-world fund managers generally charge annual fees on assets under management, as well as a carry fee on gains. Often there are one-time expenses, such as annual meetings or fund formation expenses, that are borne by the investors as well. Fund managers will generally accrue fees, although they sometimes need an advance early in the fund's life to cover start-up costs. Withdraw fees are less common, but can also be implemented separately or together with the other fees.
 
-This solution maintains a per-account basis in order to compute carry on gains, as well as for the fee on assets under managemment. The AUM "annual" fee is accrued continuously, and accounted for in the assets under management. Carry fees and withdraw fees can only be computed on withdraw, and so are not considered when looking at the vault performance as a whole.
+ERC4626Fee supports all of these use cases, as well as separate protocol fees.
+
+The solution maintains a per-account basis in order to compute carry on gains, as well as for the fee on assets under managemment. The AUM "annual" fee is accrued continuously, and accounted for in the assets under management. Carry fees and withdraw fees can only be computed on withdraw, and so are not considered when looking at the vault performance as a whole.
+
+Protocol fees can be specified in ERC4626ProtocolConfig, and can also be annual, carry, or withdraw fees. They are sent directly to a treasury address.
+
+Advanced features like discretionary fees and fee advancement can be disabled in the constructor.
 
 # Usage
 
@@ -37,19 +37,7 @@ contract MyVault is ERC4626 {
     ) ERC4626(_asset) ERC20(_name, _symbol) {}
 }
 ```
-With this for basic fees:
-```solidity
-contract MyVault is ERC4626BasicFee {
-    constructor(
-        ERC20 _asset,
-        string memory _name,
-        string memory _symbol,
-        address _managerTreasury,
-        uint32 _managerFeeBPS
-    ) ERC4626(_asset) ERC20(_name, _symbol) ERC4626BasicFee(_managerTreasury, _managerFeeBPS) {}
-}
-```
-Or this for full-featured fees:
+With this for full-featured fees:
 ```solidity
 contract MyVault is ERC4626Fee {
     constructor(

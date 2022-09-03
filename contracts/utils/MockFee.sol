@@ -7,8 +7,11 @@ import "../fees/ERC4626Fee.sol";
 /// @notice Vault instantiation for testing
 
 contract MockFee is ERC4626Fee {
+    
+    address owner;
+
     constructor(
-        ERC20 _asset,
+        IERC20Metadata _asset,
         string memory _name,
         string memory _symbol,
         uint32 _annualFeeBPS, 
@@ -17,7 +20,11 @@ contract MockFee is ERC4626Fee {
         bool _disableDiscretionaryFee, 
         bool _disableFeeAdvance
     ) ERC4626(_asset) ERC20(_name, _symbol) 
-      ERC4626Fee(_annualFeeBPS, _carryFeeBPS, _withdrawFeeBPS, _disableDiscretionaryFee, _disableFeeAdvance)
-    {}
+      ERC4626Fee(_annualFeeBPS, _carryFeeBPS, _withdrawFeeBPS, _disableDiscretionaryFee, _disableFeeAdvance) {
+        owner = _msgSender();
+      }
 
+    function requireManager() internal view override {
+      require(_msgSender() == owner, "manager required");
+    }
 }
