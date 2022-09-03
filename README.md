@@ -9,6 +9,8 @@ A full-featured and composable suite of vaults and extensions built on the [ERC4
 ## Extensions
 * [Acccess controls](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/access) include local and global whitelists, integration with popular KYC standards, and global enabling and disabling of deposits, withdraws, and transfers
 * [Fee calculations](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/fees) include annual fees, withdraw fees, and carry on gains, as well as simple one-time expenses. Fees can be accrued and advanced.
+* [Coupons](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/redemptions) are a way to pay interest and dividends without requiring redemption of underlying shares. This is important for debt funds, where interest is often paid periodically but withdrawals of principal are restricted for the life fo the fund.
+* [Redemptions](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/redemptions) provide managers with the ability to create early liquidity, both for individual investors and the entire fund. While there are many ways that redemptions work, this extension provide the framework for allowing them, assuming that front ends will manage things like registering interest for redemptions and proportioning out redemption amounts.
 
 NOT (YET) AUDITED. USE AT YOUR OWN RISK.
 
