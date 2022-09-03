@@ -27,16 +27,18 @@ contract MyVault is ERC4626 {
     ) ERC4626(_asset) ERC20(_name, _symbol) {}
 }
 ```
-You can enable basic fees simply by replacing it with this:
+You can enable fees simply by replacing it with this:
 ```solidity
-contract MyVault is ERC4626BasicFee {
+contract MyVault is ERC4626Fee {
     constructor(
         ERC20 _asset,
         string memory _name,
         string memory _symbol,
-        address _managerTreasury,
-        uint32 _managerFeeBPS
-    ) ERC4626(_asset) ERC20(_name, _symbol) ERC4626BasicFee(_managerTreasury, _managerFeeBPS) {}
+        uint32 _annualFeeBPS,
+        uint32 _carryFeeBPS,
+        uint32 _withdrawFeeBPS,
+    ) ERC4626(_asset) ERC20(_name, _symbol) 
+      ERC4626Fee(_annualFeeBPS, _carryFeeBPS, _withdrawFeeBPS, false, false) {}
 }
 ```
 Voila! You are now charging a fee. More details on implementation are in each contract directory.

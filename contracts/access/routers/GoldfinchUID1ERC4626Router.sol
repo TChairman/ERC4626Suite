@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-/// @notice ERC4626 Router that implements Goldfinch KYC and accredited restrictions (UID 1). ERC4626 vaults can whitelist this router to enable all Goldfinch KYC UIDs to transact.
+/// @notice ERC4626 Router that implements Goldfinch KYC and accredited restrictions (UID 1). ERC4626 vaults can allow list this router to enable all Goldfinch KYC UIDs to transact.
 
 import "./ERC4626AccessRouter.sol";
 import {IERC1155} from "./external/interfaces/IERC1155.sol";
