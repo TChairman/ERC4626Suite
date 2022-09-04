@@ -3,15 +3,17 @@
 A full-featured and composable suite of vaults and extensions built on the [ERC4626](https://erc4626.info) standard.
 
 ## Vaults
-* [Managed](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/managed) vaults are complete implementations of standard human-managed fund concepts in smart contracts, including investment, returns, fees, carry, and access control.
-* More (including coupons and tranches) coming soon!
+* [Index Fund](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/managed) is a fund specifically for investing in other ERC4626 vaults under manager discretion.
+* [Managed](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/managed) vaults include both ERC4626 and off-chain investments.
+* [Debt Fund](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/managed) is a fund that pays coupons separately from investment gains.
+* More (including tranches) coming soon!
 
 ## Extensions
 * [Acccess controls](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/access) include local and global whitelists, integration with popular KYC standards, and global enabling and disabling of deposits, withdraws, and transfers
 * [Fee calculations](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/fees) include annual fees, withdraw fees, and carry on gains, as well as simple one-time expenses. Fees can be accrued and advanced.
 * [Coupons](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/redemptions) are a way to pay interest and dividends without requiring redemption of underlying shares. This is important for debt funds, where interest is often paid periodically but withdrawals of principal are restricted for the life fo the fund. Includes optional ability to push (airdrop) coupons directly to onwer wallets.
 * [Redemptions](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/redemptions) provide managers with the ability to create early liquidity, both for individual investors and the entire fund. While there are many ways that redemptions work, this extension provide the framework for managers to specify them and investors to claim them, giving the foundation that front ends can use to manage things like registering interest for redemptions and proportioning out redemption amounts.
-* Enumerability keeps an on-chain list of investor wallets, which ERC4626 does not have by default. This is important for things like coupon aidrops, or reglatory compliance.
+* [Enumerability](https://github.com/tomshields/ERC4626Suite/tree/main/contracts) keeps an on-chain list of investor wallets, which ERC4626 does not have by default. This is important for things like coupon aidrops, or reglatory compliance.
 
 NOT (YET) AUDITED. USE AT YOUR OWN RISK.
 
