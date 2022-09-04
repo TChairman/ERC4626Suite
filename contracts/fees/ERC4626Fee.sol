@@ -15,6 +15,8 @@ import "./ERC4626ProtocolFeeConfig.sol";
 abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
     using Math for uint256;
 
+    uint32 constant DAYS_PER_YEAR = 360; // many funds use 360 day year
+
     // Constants / immutables
     uint32 public immutable annualFeeBPS;
     uint32 public immutable carryFeeBPS;
@@ -70,7 +72,7 @@ abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
     }
 
     function accruedAnnualFee() public virtual view returns (uint256) {
-        return totalPaidIn.mulDiv(annualFeeBPS, BPS_MULTIPLE, Math.Rounding.Down).mulDiv(block.timestamp - lastAnnualFeeAccrual, 365 days);
+        return totalPaidIn.mulDiv(annualFeeBPS, BPS_MULTIPLE, Math.Rounding.Down).mulDiv(block.timestamp - lastAnnualFeeAccrual, DAYS_PER_YEAR);
     }
 
     function totalAccruedFees() public virtual view returns (int256) {

@@ -3,11 +3,12 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
 import "../fees/ERC4626Fee.sol";
+import "../access/ERC4626Access.sol";
 
 /// @notice Index Fund vault for ERC4626 investments. Manager decides when to invest/divest in any ERC4626 vault.
 /// @notice Gains are not computed until investments are updated, either by an investment, or a call to updateAssetValue.
 
-contract ERC4626IndexFund is ERC4626Fee {
+contract ERC4626IndexFund is ERC4626Fee, ERC4626Access {
 
 /*
 Key things to think about:
@@ -18,7 +19,7 @@ but the problem still remains.
 /* Potential optimization to add:
    uint256 nextInvestmentToUpdate; // every tx updates at least one other investment too, spread the cost
    uint256 updateQuantum = 1000; // don't update if already updated this recently
-   with function updateNextAssetValue() that does next in line
+   function updateNextAssetValue() - call from every tx to update next in line
 */
 
     // Events
@@ -57,17 +58,12 @@ but the problem still remains.
 
     // Investment manager functions
 
-    // Do checks to ensure unsafe casts are guaranteed
-    function totalAssets() public view virtual override returns (uint256 assets) {
-        int256 avail = availableAssets();
-        if (avail < 0) {
-            assets = (uint256(-avail) > investmentAssetsTotal) ? 0 : investmentAssetsTotal - uint256(-avail);
-        } else {
-            assets = investmentAssetsTotal + uint256(avail);
-        }
+    // used in totalAssets()
+    function totalNAV () public view virtual override returns (uint256) {
+        return investmentAssetsTotal;
     }
     
-    function depositInvestment(ERC4626 _vault, uint256 _assets) public virtual onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256 _shares) {
+    function depositInvestment(ERC4626 _vault, uint256 _assets) public virtual onlyManager returns (uint256 _shares) {
         require(_vault.asset() == asset(), "Investment asset does not match vault");
 
         uint32 index = investmentIndex[address(_vault)];
@@ -83,7 +79,7 @@ but the problem still remains.
         emit depositInvestmentEvent(address(_vault), _assets);
     }
 
-    function redeemInvestment(ERC4626 _vault, uint256 _shares) public virtual onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256 _assets) {
+    function redeemInvestment(ERC4626 _vault, uint256 _shares) public virtual onlyManager returns (uint256 _assets) {
         uint32 index = investmentIndex[address(_vault)];
         uint256 sharesMax = _vault.maxWithdraw(address(this));
         if (_shares > sharesMax) _shares = sharesMax;
@@ -113,10 +109,55 @@ but the problem still remains.
         return investmentAssetsTotal;
     }
 
-    function forceTransferFrom(address from, address to, uint256 amount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    function forceTransferFrom(address from, address to, uint256 amount) public virtual onlyManager {
         require(!disableForceTransfer, "Force transfers disabled");
         require(transferFrom(from, to, amount), "Force transfer failed");
         emit forceTransferFromEvent(from, to, amount);
     }
- 
+
+    // Everything below here is just crap to satisfy the compiler about multiple inheritance
+    function requireManager() internal view override(ERC4626Access, ERC4626SuiteContext) {
+      return super.requireManager();
+    }
+    
+    function _deposit (address caller, address receiver, uint256 assets, uint256 shares
+    ) internal virtual override(ERC4626Access, ERC4626Fee) {
+        return super._deposit(caller, receiver, assets, shares);
+    }
+
+    function _withdraw (address caller, address receiver, address owner, uint256 assets, uint256 shares
+    ) internal virtual override(ERC4626Access, ERC4626Fee) {
+        return super._withdraw(caller, receiver, owner, assets, shares);
+    }
+
+    function _transfer(address from, address to, uint256 amount
+    ) internal virtual override(ERC4626Access, ERC4626Fee) {
+        return super._transfer(from, to, amount);
+    }
+
+    function redeem(uint256 shares, address receiver, address owner
+    ) public virtual override(ERC4626, ERC4626Fee) returns (uint256) {
+      return super.redeem(shares, receiver, owner); 
+    }
+   function withdraw(uint256 assets, address receiver, address owner
+    ) public virtual override(ERC4626, ERC4626Fee) returns (uint256) {
+      return super.withdraw(assets, receiver, owner);
+    }
+
+    function totalAssets() public view virtual override(ERC4626SuiteContext, ERC4626Fee) returns (uint256) {
+      return super.totalAssets();
+    }
+    function maxDeposit(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
+        return super.maxDeposit(owner);
+    }
+    function maxMint(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
+        return super.maxRedeem(owner);
+    }
+    function maxWithdraw(address owner) public view virtual override(ERC4626Fee, ERC4626Access) returns (uint256) {
+        return super.maxWithdraw(owner);
+    }
+    function maxRedeem(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
+        return super.maxRedeem(owner);
+    }
+
 }

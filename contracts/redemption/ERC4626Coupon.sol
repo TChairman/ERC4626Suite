@@ -29,8 +29,10 @@ abstract contract ERC4626Coupon is ERC4626SuiteContext {
     // use this in totalAssets() instead of asset.balanceOf(this)
     function availableAssets() public virtual override view returns (uint256 avail) {
         avail = super.availableAssets();
-        require (avail >= couponAssetsReserved, "Internal error: assets less than reserve"); // should never get here
-        avail -= couponAssetsReserved;
+        assert(avail >= couponAssetsReserved); // should never get here
+        unchecked {
+            avail -= couponAssetsReserved;
+        }
     }
 
     function distributeCoupon(uint256 _coupon) internal virtual onlyManager {

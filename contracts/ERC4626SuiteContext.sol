@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 /// @notice ERC4626SuiteContect functions used in most other Suite contracts
    
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";    
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";    
 
 abstract contract ERC4626SuiteContext is ERC4626 {

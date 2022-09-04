@@ -77,8 +77,10 @@ abstract contract ERC4626Redemption is ERC4626SuiteContext {
     // return IERC20(asset()).balanceOf(address(this)) - redemptionAssetsReserved - couponAssetsReserved;
     function availableAssets() public virtual override view returns (uint256 avail) {
         avail = super.availableAssets();
-        require (avail >= redemptionAssetsReserved, "Internal error: assets less than reserve");
-        avail -= redemptionAssetsReserved;
+        assert (avail >= redemptionAssetsReserved);
+        unchecked {
+            avail -= redemptionAssetsReserved;
+        }
     }
 
     // issue a redemption proportionally to all investors
