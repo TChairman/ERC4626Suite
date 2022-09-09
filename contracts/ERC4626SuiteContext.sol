@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 abstract contract ERC4626SuiteContext is ERC4626 {
 
     uint32 constant BPS_MULTIPLE = 10000;
+    uint32 constant DAYS_PER_YEAR = 360; // many funds use 360 day year
 
     // this should be overridden if not using Access, default to revert
     function requireManager() internal virtual view;
