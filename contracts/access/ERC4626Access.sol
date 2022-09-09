@@ -152,34 +152,16 @@ abstract contract ERC4626Access is ERC4626SuiteContext, AccessControl, Pausable 
         return isWithdrawRedeemAllowed(owner) ? super.maxRedeem(owner) : 0;
     }
 
-    // _deposit() protects both deposit and mint, and is not usually overridden
-    function _deposit (
-        address caller,
-        address receiver,
-        uint256 assets,
-        uint256 shares
-    ) internal virtual override requireDepositMintAllowed(receiver) {
-        super._deposit(caller, receiver, assets, shares);
-    }
-
-    // _withdraw protects both withdraw and redeem, and is not usually overridden
-    function _withdraw (
-        address caller,
-        address receiver,
-        address owner,
-        uint256 assets,
-        uint256 shares
-    ) internal virtual override requireWithdrawReedemAllowed(owner) {
-        super._withdraw(caller, receiver, owner, assets, shares);
-    }
-
-    // _transfer protects both transfer and transferFrom, and is not usually overriden
-    // could also override _beforeTokenTransfer hook, but this seems cleaner
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override requireTransferAllowed(from) requireDepositMintAllowed(to) {
-        super._transfer(from, to, amount);
+    // actually implement the restrictions here
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
+        if (from == address(0)) { // mint
+            require(isDepositMintAllowed(to), "ERC4626Access: deposit or mint not allowed");
+        } else if (to == address (0)) { // burn
+            require(isWithdrawRedeemAllowed(from), "ERC4626Access: withdraw or redeem not allowed");
+        } else { // transfer
+            require(isTransferAllowed(from), "ERC4626Access: from transfer not allowed");
+            require(isDepositMintAllowed(to), "ERC4626Access: to transfer not allowed");
+        }
+        super._beforeTokenTransfer(from, to, amount);
     }
 }
