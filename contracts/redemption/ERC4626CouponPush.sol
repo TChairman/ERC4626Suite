@@ -6,7 +6,6 @@ import "./ERC4626Coupon.sol";
 import "../ERC4626Enumerable.sol";
 
 /// @notice Enable pushing of coupons and dividends directly to investor wallets. Basically an airdrop.
-/// @notice Could also base this on ERC426Enumerable, but it was cleaner to just duplicate the code.
 
 abstract contract ERC4626CouponPush is ERC4626Coupon, ERC4626Enumerable {
 
