@@ -28,7 +28,7 @@ but the problem still remains.
     event redeemInvestmentEvent(address indexed vault, uint256 amount);
 
     // Constants
-    uint8 constant MAXINVESTMENTS = 255;
+    uint8 constant MAX_INVESTMENTS = 255;
 
     // Variables
     struct investment {
@@ -38,7 +38,6 @@ but the problem still remains.
     investment[] investments; // keep track of all the investments
     mapping(address => uint32) public investmentIndex; // so we can look them up easily
     uint256 investmentAssetsTotal;
-    bool immutable public disableForceTransfer; // many vaults need forceTransfer for regulatory reasons, others may want to disable
 
     constructor(
         ERC20 _asset,
@@ -48,12 +47,10 @@ but the problem still remains.
         uint32 _carryFeeBPS, 
         uint32 _withdrawFeeBPS, 
         bool _disableDiscretionaryFee, 
-        bool _disableFeeAdvance,
-        bool _disableForceTransfer
+        bool _disableFeeAdvance
     ) ERC4626(_asset) ERC20(_name, _symbol)
       ERC4626Fee(_annualFeeBPS, _carryFeeBPS, _withdrawFeeBPS, _disableDiscretionaryFee, _disableFeeAdvance)
     {
-        disableForceTransfer = _disableForceTransfer;
     }
 
     // Investment manager functions
@@ -69,9 +66,9 @@ but the problem still remains.
         uint32 index = investmentIndex[address(_vault)];
         if (investments[index].vault != _vault) { // new investment vault, index was zero
             index = uint32(investments.length);
-            require(index < MAXINVESTMENTS, "Investment would exceed MAXINVESTMENTS");
+            require(index < MAX_INVESTMENTS, "Investment would exceed MAXINVESTMENTS");
             investmentIndex[address(_vault)] = index;
-            investments[index].vault = _vault;
+            investments.push(investment(_vault, 0));
         }
 
         _shares = _vault.deposit(_assets, address(this));
@@ -104,7 +101,9 @@ but the problem still remains.
     function updateAllAssets() public virtual returns (uint256) {
         investmentAssetsTotal = 0;
         for(uint8 i=0; i<= investments.length; i++){
-            investmentAssetsTotal += investments[i].vault.maxWithdraw(address(this));
+            uint256 assetVal = investments[i].vault.maxWithdraw(address(this));
+            investments[i].lastAssets = assetVal;
+            investmentAssetsTotal += assetVal;
         }
         return investmentAssetsTotal;
     }
