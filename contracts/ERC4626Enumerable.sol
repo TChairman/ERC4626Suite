@@ -27,9 +27,8 @@ abstract contract ERC4626Enumerable is ERC4626 {
         return _investors.length();
     }
 
-    function investorAt(uint256 idx) internal view returns (address, uint256) {
-        address addr = _investors.at(idx);
-        return (addr, balanceOf(addr));
+    function investorAt(uint256 idx) internal view returns (address) {
+        return _investors.at(idx);
     }
 
 }
