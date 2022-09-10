@@ -25,9 +25,6 @@ abstract contract ERC4626SuiteContext is ERC4626 {
         return IERC20(asset()).balanceOf(address(this));
     }
 
-    function availableSupply() public virtual view returns (uint256) {
-        return totalSupply();
-    }
      // override this so you don't have to re-implement totalAssets() below
     function totalNAV() public virtual view returns (uint256) {
         return 0;

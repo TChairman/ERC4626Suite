@@ -4,11 +4,12 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../fees/ERC4626Fee.sol";
 import "../access/ERC4626Access.sol";
+import "../access/ERC4626Force.sol";
 
 /// @notice Index Fund vault for ERC4626 investments. Manager decides when to invest/divest in any ERC4626 vault.
 /// @notice Gains are not computed until investments are updated, either by an investment, or a call to updateAssetValue.
 
-contract ERC4626IndexFund is ERC4626Fee, ERC4626Access {
+contract ERC4626IndexFund is ERC4626Fee, ERC4626Access, ERC4626Force {
 
 /*
 Key things to think about:
@@ -25,7 +26,6 @@ but the problem still remains.
     // Events
     event depositInvestmentEvent(address indexed vault, uint256 amount);
     event redeemInvestmentEvent(address indexed vault, uint256 amount);
-    event forceTransferFromEvent(address indexed from, address indexed to, uint256 amount);
 
     // Constants
     uint8 constant MAXINVESTMENTS = 255;
@@ -109,12 +109,6 @@ but the problem still remains.
         return investmentAssetsTotal;
     }
 
-    function forceTransferFrom(address from, address to, uint256 amount) public virtual onlyManager {
-        require(!disableForceTransfer, "Force transfers disabled");
-        require(transferFrom(from, to, amount), "Force transfer failed");
-        emit forceTransferFromEvent(from, to, amount);
-    }
-
     // Everything below here is just crap to satisfy the compiler about multiple inheritance
     function requireManager() internal view override(ERC4626Access, ERC4626SuiteContext) {
       return super.requireManager();
@@ -160,7 +154,7 @@ but the problem still remains.
     function maxMint(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
         return super.maxRedeem(owner);
     }
-    function maxWithdraw(address owner) public view virtual override(ERC4626Fee, ERC4626Access) returns (uint256) {
+    function maxWithdraw(address owner) public view virtual override(ERC4626, ERC4626Fee, ERC4626Access) returns (uint256) {
         return super.maxWithdraw(owner);
     }
     function maxRedeem(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
