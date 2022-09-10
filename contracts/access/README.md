@@ -40,6 +40,10 @@ allowDepositMint(<ROUTER_ADDRESS>);
 
 Any frontends may need to be adjusted to call the router for deposits, mints, and transfers. Withdrawals can also go through the router, but are not generally restricted - if they hold your token, presumably they already passed the restrictions.
 
+## ERC4626 Force
+
+Many jurisdictions require the ability to force the transfer or redemption of shares, for a variety of reasons. This extension gives the manager the ability to force transfer or force redeem individual investors. Most likely used in conjunction with [ERC4626Enumerable](https://github.com/tomshields/ERC4626Suite/tree/main/contracts) to keep track of the investors. 
+
 # Known Routers
 
 | Provider | ENS | Address | Status |
@@ -52,7 +56,7 @@ Any frontends may need to be adjusted to call the router for deposits, mints, an
 KYC and other identity providers should create and maintain their own routers which can be used by any ERC4626 vault provider. 
 For convenience, we have reserved `4626access.eth` as a domain for these, contact us if you'd like to reserve a subdomain for your permanent router.
 
-Creating a new router is fairly easy. Implemnet `isAllowed()` with your restrictions (e.g. check an NFT, etc). Then instantiate the contract and deploy. See the example code in test, or the related `GlobalallowlistERC4626Router`.
+Creating a new router is fairly easy. Implement `isAllowed()` with your restrictions (e.g. check an NFT, etc). Then instantiate the contract and deploy. See the example code in test, or the related `GlobalAllowlistERC4626Router`.
 
 ## Primary Functions Provided
 
