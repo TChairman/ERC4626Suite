@@ -15,8 +15,6 @@ import "./ERC4626ProtocolFeeConfig.sol";
 abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
     using Math for uint256;
 
-    uint32 constant DAYS_PER_YEAR = 360; // many funds use 360 day year
-
     // Constants / immutables
     uint32 public immutable annualFeeBPS;
     uint32 public immutable carryFeeBPS;
@@ -153,7 +151,7 @@ abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
     }
 
     function netAssets(address owner) public virtual view returns (uint256 assets, uint256 withdrawFee, uint256 carryFee) {
-        uint256 availSup = availableSupply();
+        uint256 availSup = totalSupply();
         if (availSup == 0) return (0,0,0);
         assets = balanceOf(owner).mulDiv(totalAssets(), availSup); // what owner would have with only annual fees accrued
 
