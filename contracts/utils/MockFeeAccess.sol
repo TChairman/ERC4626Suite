@@ -25,24 +25,29 @@ contract MockFeeAccess is ERC4626Fee, ERC4626Access {
     }
     
     function _deposit (address caller, address receiver, uint256 assets, uint256 shares
-    ) internal virtual override(ERC4626Access, ERC4626Fee) {
+    ) internal virtual override(ERC4626, ERC4626Fee) {
         return super._deposit(caller, receiver, assets, shares);
     }
 
     function _withdraw (address caller, address receiver, address owner, uint256 assets, uint256 shares
-    ) internal virtual override(ERC4626Access, ERC4626Fee) {
+    ) internal virtual override(ERC4626, ERC4626Fee) {
         return super._withdraw(caller, receiver, owner, assets, shares);
     }
 
     function _transfer(address from, address to, uint256 amount
-    ) internal virtual override(ERC4626Access, ERC4626Fee) {
+    ) internal virtual override(ERC20, ERC4626Fee) {
         return super._transfer(from, to, amount);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20, ERC4626Access) {
+        super._beforeTokenTransfer(from, to, amount);
     }
 
     function redeem(uint256 shares, address receiver, address owner
     ) public virtual override(ERC4626, ERC4626Fee) returns (uint256) {
       return super.redeem(shares, receiver, owner); 
     }
+
    function withdraw(uint256 assets, address receiver, address owner
     ) public virtual override(ERC4626, ERC4626Fee) returns (uint256) {
       return super.withdraw(assets, receiver, owner);
