@@ -114,12 +114,12 @@ but the problem still remains.
     }
     
     function _deposit (address caller, address receiver, uint256 assets, uint256 shares
-    ) internal virtual override(ERC4626, ERC4626Fee) {
+    ) internal virtual override(ERC4626SuiteContext, ERC4626Fee) {
         return super._deposit(caller, receiver, assets, shares);
     }
 
     function _withdraw (address caller, address receiver, address owner, uint256 assets, uint256 shares
-    ) internal virtual override(ERC4626, ERC4626Fee) {
+    ) internal virtual override(ERC4626SuiteContext, ERC4626Fee) {
         return super._withdraw(caller, receiver, owner, assets, shares);
     }
 

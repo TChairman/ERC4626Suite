@@ -40,4 +40,23 @@ abstract contract ERC4626CouponPush is ERC4626Coupon, ERC4626Enumerable {
         return super.totalAssets();
     }
 
+    function _withdraw (
+        address caller,
+        address receiver,
+        address owner,
+        uint256 assets,
+        uint256 shares
+    ) internal virtual override(ERC4626, ERC4626SuiteContext) {
+        super._withdraw(caller, receiver, owner, assets, shares);
+    }
+
+    function _deposit (
+        address caller,
+        address receiver,
+        uint256 assets,
+        uint256 shares
+    ) internal virtual override(ERC4626, ERC4626SuiteContext) {
+        super._deposit(caller, receiver, assets, shares);
+    }
+
 }
