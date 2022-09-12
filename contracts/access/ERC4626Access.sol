@@ -73,21 +73,21 @@ abstract contract ERC4626Access is ERC4626SuiteContext, AccessControl, Pausable 
         _unpause();
     }
 
-    // the key access logic
+    // the key access logic. Manager can always deposit/withdraw/transfer on behalf of anyone
     function isDepositMintAllowed(address owner) public view virtual returns (bool) {
-        return !paused() && ((depositMintAccess == accessType.open) || 
+        return !paused() && (hasRole(MANAGER_ROLE, _msgSender()) || (depositMintAccess == accessType.open) || 
         ((depositMintAccess == accessType.allowList) && hasRole(DEPOSIT_ALLOWLIST, owner)) ||
         ((depositMintAccess == accessType.blockList) && !hasRole(DEPOSIT_BLOCKLIST, owner)));
     }
 
     function isWithdrawRedeemAllowed(address owner) public view virtual returns (bool) {
-        return !paused() && ((withdrawRedeemAccess == accessType.open) || 
+        return !paused() && (hasRole(MANAGER_ROLE, _msgSender()) || (withdrawRedeemAccess == accessType.open) || 
         ((withdrawRedeemAccess == accessType.allowList) && hasRole(WITHDRAW_ALLOWLIST, owner)) ||
         ((withdrawRedeemAccess == accessType.blockList) && !hasRole(WITHDRAW_BLOCKLIST, owner)));
     }
 
     function isTransferAllowed(address owner) public view virtual returns (bool) {
-        return !paused() && ((transferAccess == accessType.open) || 
+        return !paused() && (hasRole(MANAGER_ROLE, _msgSender()) || (transferAccess == accessType.open) || 
         ((transferAccess == accessType.allowList) && hasRole(TRANSFER_ALLOWLIST, owner)) ||
         ((transferAccess == accessType.blockList) && !hasRole(TRANSFER_BLOCKLIST, owner)));
     }
