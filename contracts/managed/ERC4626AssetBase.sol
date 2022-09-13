@@ -56,6 +56,9 @@ abstract contract ERC4626AssetBase is ERC4626SuiteContext {
         return totalAssetNAV + accruedExpectedReturn + (block.timestamp - lastExpectedReturnUpdate) * totalExpectedReturnPerSec; 
     }
 
+    // can override for fee calculations
+    function afterNAVupdated() internal virtual {}
+
     // return true if asset newly created, false if asset already existed
     function createAsset(
             bytes32 _assetType,
@@ -127,6 +130,7 @@ abstract contract ERC4626AssetBase is ERC4626SuiteContext {
         updateAccruedExpectedReturn();
         accruedExpectedReturn -= assetList[index].expectedReturnBPS.mulDiv(oldNAV, SECS_PER_YEAR * BPS_MULTIPLE * (block.timestamp - assetList[index].lastNAVupdate));
         
+        afterNAVupdated();
         assetList[index].lastNAVupdate = block.timestamp;
         emit setNAVEvent(assetList[index].assetType, assetList[index].assetAddress, assetList[index].assetReference, oldNAV, newNAV);
     }
