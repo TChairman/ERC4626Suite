@@ -19,38 +19,48 @@ abstract contract ERC4626Coupon is ERC4626SuiteContext {
     mapping (address => couponType) _coupons;
 
     // Events
-    event couponDistributedEvent(uint256 coupon);
+    event distributeCouponEvent(uint256 coupon);
+    event withdrawCouponEvent(uint256 amount, address receiver, address owner);
 
     constructor() {
     }
+
+    //// Investor Functions
+    //// Naming is intended to mimic ERC4626 somewhat - maxCoupon is similar to maxRedeem and maxWithdraw
+    //// Could use redeem or withdraw
+
+    function maxWithdrawCoupon(address _owner) public virtual view returns (uint256) {
+        uint256 totSup = totalSupply();
+        if (totSup == 0) return 0;
+        return _coupons[_owner].remainingCoupon + (totalCouponPaid - _coupons[_owner].lastTotalCoupon).mulDiv(balanceOf(_owner), totSup);
+    }
+
+    function withdrawCoupon (uint256 _amount, address _receiver, address _owner) public virtual {
+        uint256 avail = maxWithdrawCoupon(_owner);
+        if (_amount > avail) _amount = avail;
+        _coupons[_owner].lastTotalCoupon = totalCouponPaid;
+        _coupons[_owner].remainingCoupon = avail - _amount; // safe because of above check
+        couponAssetsReserved -= _amount;
+        require(IERC20(asset()).transfer(_receiver, _amount), "claimCoupon: Transfer failed");
+        emit withdrawCouponEvent(_amount, _receiver, _owner);
+    }
+
+    //// Manager Functions
 
     function distributeCoupon(uint256 _coupon) internal virtual onlyManager {
         require(availableAssets() >= _coupon, "distributeCoupon: not enough assets");
         totalCouponPaid += _coupon;
         couponAssetsReserved += _coupon;
-        emit couponDistributedEvent(_coupon);
+        emit distributeCouponEvent(_coupon);
     }
 
-    function couponBalance(address owner) public virtual view returns (uint256) {
-        uint256 totSup = totalSupply();
-        if (totSup == 0) return 0;
-        return _coupons[owner].remainingCoupon + (totalCouponPaid - _coupons[owner].lastTotalCoupon).mulDiv(balanceOf(owner), totSup);
-    }
+    //// Internal Functions
 
-    function updateCouponBalance(address owner) public virtual returns (uint256) {
+    function updateCouponBalance(address owner) internal virtual returns (uint256) {
         uint256 totSup = totalSupply();
         if (totSup == 0) return 0;
         _coupons[owner].lastTotalCoupon = totalCouponPaid;
-        return _coupons[owner].remainingCoupon = couponBalance(owner);
-    }
-
-    function claimCoupon (address owner, address to, uint256 amount) public virtual {
-        uint256 avail = couponBalance(owner);
-        if (amount > avail) amount = avail;
-        _coupons[owner].lastTotalCoupon = totalCouponPaid;
-        _coupons[owner].remainingCoupon = avail - amount; // safe because of above check
-        couponAssetsReserved -= amount;
-        require(IERC20(asset()).transfer(to, amount), "claimCoupon: Transfer failed");
+        return _coupons[owner].remainingCoupon = maxWithdrawCoupon(owner);
     }
 
     // use this in totalAssets() instead of asset.balanceOf(this)

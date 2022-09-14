@@ -9,24 +9,31 @@ import "../ERC4626Enumerable.sol";
 
 abstract contract ERC4626CouponPush is ERC4626Coupon, ERC4626Enumerable {
 
+    function pushCoupon(address owner) public virtual {
+        withdrawCoupon(type(uint256).max, owner, owner);
+    }
+
+    // returns true if all coupons have been pushed, false if there are any left to push
     function pushSomeCoupons(uint256 numToPush) public virtual returns (bool) {
         uint256 len = investorCount();
         uint256 i = 0;
         address addr;
         while ((numToPush > 0) && (i < len)) {
             addr = investorAt(i);
-            if (couponBalance(addr) > 0) {
+            if (maxWithdrawCoupon(addr) > 0) {
                 pushCoupon(addr);
                 numToPush--;
             }
             i++;
         }
-        return i == len;
+        while (i < len) { // check to see if any remain
+            if (maxWithdrawCoupon(addr) > 0) return false;
+            i++;
+        }
+        return true;
     }
 
-    function pushCoupon(address owner) public virtual {
-        claimCoupon(owner, owner, type(uint256).max);
-    }
+    // Everything below here is to satisfy the compiler about multiple inheritance
 
     function _beforeTokenTransfer(
         address from,
