@@ -8,11 +8,11 @@ import "./ERC4626AssetBase.sol";
 /// @notice Manager decides when to invest/divest in any off-chain investment
 /// @notice Gains are estimated until investments are updated by a call to updateNAV
 
-abstract contract ERC4626AssetVault is ERC4626AssetBase {
+abstract contract ERC4626Asset4626 is ERC4626AssetBase {
     using Math for uint256;
 
     // Events
-    bytes32 public constant ERC4626_ASSET = keccak256("ERC4626_ASSET");
+    bytes32 public constant ERC4626_ASSET = keccak256("4626_ASSET");
 
     constructor() {
     }
