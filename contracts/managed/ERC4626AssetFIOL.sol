@@ -5,9 +5,8 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./ERC4626AssetBase.sol";
 import "./interfaces/IFixedInterestOnlyLoans.sol";
 
-/// @notice Support for off-chain assets
-/// @notice Manager decides when to invest/divest in any off-chain investment
-/// @notice Gains are not computed until investments are updated by as call to updateNAV
+/// @notice Support for TrueFi Fixed Interest Only Loans
+/// @notice Payments are not checked for correctness, they should be validated off chain
 
 abstract contract ERC4626AssetFIOL is ERC4626AssetBase {
     using Math for uint256;
