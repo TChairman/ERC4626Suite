@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 abstract contract ERC4626SuiteContext is ERC4626 {
 
     uint32 constant BPS_MULTIPLE = 10000;
-    uint32 constant DAYS_PER_YEAR = 360; // many funds use 360 day year
+    uint32 public immutable DAYS_PER_YEAR = 360; // many funds use 360 day year
 
     // this should be overridden if not using Access, default to revert
     function requireManager() internal virtual view;
@@ -20,12 +20,12 @@ abstract contract ERC4626SuiteContext is ERC4626 {
         _;
     }
 
-    // can be overridden and adjusted by child contracts
+    // can be overridden by child contracts to reserve assets
     function availableAssets() public virtual view returns (uint256) {
         return IERC20(asset()).balanceOf(address(this));
     }
 
-     // override this so you don't have to re-implement totalAssets() below
+     // override this for asset values instead of re-implementing totalAssets()
     function totalNAV() public virtual view returns (uint256) {
         return 0;
     }
