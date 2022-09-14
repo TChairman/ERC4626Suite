@@ -5,14 +5,14 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../fees/ERC4626Fee.sol";
 import "../access/ERC4626Access.sol";
 import "../access/ERC4626Force.sol";
-import "./ERC4626AssetVault.sol";
+import "./ERC4626Asset4626.sol";
 import "./ERC4626AssetOffChain.sol";
 
 
 /// @notice Index Fund vault for ERC4626 investments. Manager decides when to invest/divest in any ERC4626 vault.
 /// @notice Gains are not computed until investments are updated, either by an investment, or a call to updateAssetValue.
 
-contract ERC4626IndexFund is ERC4626AssetVault, ERC4626AssetOffChain, ERC4626Fee, ERC4626Access, ERC4626Force {
+contract ERC4626IndexFund is ERC4626Asset4626, ERC4626AssetOffChain, ERC4626Fee, ERC4626Access, ERC4626Force {
 
     constructor(
         ERC20 _asset,
@@ -86,7 +86,7 @@ contract ERC4626IndexFund is ERC4626AssetVault, ERC4626AssetOffChain, ERC4626Fee
     function maxRedeem(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
         return super.maxRedeem(owner);
     }
-    function getLatestNAV(assetStruct storage asset) internal view virtual override(ERC4626AssetBase, ERC4626AssetVault) returns (uint256) {
+    function getLatestNAV(assetStruct storage asset) internal view virtual override(ERC4626AssetBase, ERC4626Asset4626) returns (uint256) {
         return super.getLatestNAV(asset);
     }
 
