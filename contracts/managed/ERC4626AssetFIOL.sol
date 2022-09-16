@@ -23,7 +23,7 @@ abstract contract ERC4626AssetFIOL is ERC4626AssetBase {
 
     function getLatestNAV(assetStruct storage asset) internal view virtual override returns (uint256) {
         if (asset.assetType == FIOL_ASSET) {
-            return IFixedInterestOnlyLoans(asset.assetAddress).principal(asset.assetReference); // FIOL doesn't seem to have a way to estimate inter-period interest accrued
+            return IFixedInterestOnlyLoans(asset.assetAddress).principal(asset.id); // FIOL doesn't seem to have a way to estimate inter-period interest accrued
         } else {
             return super.getLatestNAV(asset);
         }
@@ -31,12 +31,13 @@ abstract contract ERC4626AssetFIOL is ERC4626AssetBase {
 
     function createFIOL(uint256 _principal, uint16 _periodCount, uint256 _periodPayment, uint32 _periodDuration, address _recipient) public virtual onlyManager {
         uint256 loanID = FIOLcontract.issueLoan(IERC20WithDecimals(asset()), _principal, _periodCount, _periodPayment, _periodDuration, _recipient, 0, true);
-        createAsset(FIOL_ASSET, address(FIOLcontract), loanID, 0, 0); // start with 0 balance until funded
+        createAsset(FIOL_ASSET, address(FIOLcontract), loanID, _principal, 0, 0); // start with 0 net value until funded, should compute rate here?
     }
 
     function fundFIOL(uint256 _loanID) public virtual onlyManager returns (uint256 _principal) {
         _principal = FIOLcontract.principal(_loanID);
         FIOLcontract.start(_loanID);
+        setNAV(address(FIOLcontract), _loanID, _principal);
         require(IERC20(asset()).transfer(FIOLcontract.recipient(_loanID), _principal), "fundFIOL: transfer failed");
     }
 
