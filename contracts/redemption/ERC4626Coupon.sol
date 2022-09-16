@@ -26,8 +26,11 @@ abstract contract ERC4626Coupon is ERC4626SuiteContext {
     }
 
     //// Investor Functions
-    //// Naming is intended to mimic ERC4626 somewhat - maxCoupon is similar to maxRedeem and maxWithdraw
-    //// Could use redeem or withdraw
+    //// Naming is intended to mimic ERC4626:
+    //// withdrawCoupon() is same signature as ERC4626 withdraw()
+    //// - returns assets actually withdrawn (not shares)
+    //// - if more is requested than is available, will withdraw all available (unlike ERC4626)
+    //// maxWithdrawCoupon() is same signature as ERC4626 maxWithdraw()
 
     function maxWithdrawCoupon(address _owner) public virtual view returns (uint256) {
         uint256 totSup = totalSupply();
@@ -35,14 +38,15 @@ abstract contract ERC4626Coupon is ERC4626SuiteContext {
         return _coupons[_owner].remainingCoupon + (totalCouponPaid - _coupons[_owner].lastTotalCoupon).mulDiv(balanceOf(_owner), totSup);
     }
 
-    function withdrawCoupon (uint256 _amount, address _receiver, address _owner) public virtual {
+    function withdrawCoupon (uint256 _amount, address _receiver, address _owner) public virtual returns (uint256) {
         uint256 avail = maxWithdrawCoupon(_owner);
         if (_amount > avail) _amount = avail;
         _coupons[_owner].lastTotalCoupon = totalCouponPaid;
         _coupons[_owner].remainingCoupon = avail - _amount; // safe because of above check
         couponAssetsReserved -= _amount;
-        require(IERC20(asset()).transfer(_receiver, _amount), "claimCoupon: Transfer failed");
+        require(IERC20(asset()).transfer(_receiver, _amount), "withdrawCoupon: Transfer failed");
         emit withdrawCouponEvent(_amount, _receiver, _owner);
+        return _amount;
     }
 
     //// Manager Functions
