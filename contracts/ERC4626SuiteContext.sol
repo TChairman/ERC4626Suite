@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-/// @notice ERC4626SuiteContect functions used in most other Suite contracts
+/// @notice ERC4626SuiteContext - enhance the OpenZeppelin ERC4626 base implementation with hooks and functions used in most other Suite contracts
    
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";    
@@ -10,9 +10,10 @@ import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 abstract contract ERC4626SuiteContext is ERC4626 {
 
     uint32 constant BPS_MULTIPLE = 10000;
-    uint32 public immutable DAYS_PER_YEAR = 360; // many funds use 360 day year
+    uint32 public immutable DAYS_PER_YEAR = 360; // many funds use 360 day year; if updated be sure to update SECS_PER_YEAR below too
+    uint32 public immutable SECS_PER_YEAR = 360 * 24 * 60 * 60;
 
-    // this should be overridden if not using Access, default to revert
+    // this needs to be implemented if not using ERC4626Access
     function requireManager() internal virtual view;
 
     modifier onlyManager() virtual {
