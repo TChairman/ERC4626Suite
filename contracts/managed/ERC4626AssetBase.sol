@@ -18,7 +18,6 @@ abstract contract ERC4626AssetBase is ERC4626SuiteContext {
     event setExpectedReturnBPSEvent(bytes32 indexed _type, address indexed _vault, uint256 _reference, uint256 _oldBPS, uint256 _newBPS);
 
     // Constants
-    uint32 SECS_PER_YEAR = DAYS_PER_YEAR * 24 * 60 * 60;
     uint32 constant MAX_ASSETS = 255;
 
     struct assetStruct {

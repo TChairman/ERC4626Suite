@@ -12,7 +12,7 @@ abstract contract ERC4626Asset4626 is ERC4626AssetBase {
     using Math for uint256;
 
     // Events
-    bytes32 public constant ERC4626_ASSET = keccak256("4626_ASSET");
+    bytes32 public constant ERC4626_ASSET = keccak256("ERC4626_ASSET");
 
     constructor() {
     }
