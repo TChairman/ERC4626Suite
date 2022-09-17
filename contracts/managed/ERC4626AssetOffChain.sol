@@ -24,7 +24,7 @@ abstract contract ERC4626AssetOffChain is ERC4626AssetBase {
     }
  
     function depositOffChainDebt(address _receiver, uint256 _reference, uint256 _amount, uint256 _expectedReturnBPS) public virtual onlyManager {
-        require(createAsset(OFFCHAIN_ASSET, _receiver, _reference, _amount, _expectedReturnBPS), "createAsset failed, increment reference?");
+        require(createAsset(OFFCHAIN_ASSET, _receiver, _reference, _amount, _amount, _expectedReturnBPS), "createAsset failed, increment reference?");
         require(ERC20(asset()).transfer(_receiver, _amount), "Transfer failed");
     }
 
