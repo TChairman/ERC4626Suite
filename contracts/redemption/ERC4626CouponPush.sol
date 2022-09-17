@@ -15,11 +15,11 @@ abstract contract ERC4626CouponPush is ERC4626Coupon, ERC4626Enumerable {
 
     // returns true if all coupons have been pushed, false if there are any left to push
     function pushSomeCoupons(uint256 numToPush) public virtual returns (bool) {
-        uint256 len = investorCount();
+        uint256 len = _addressCount();
         uint256 i = 0;
         address addr;
         while ((numToPush > 0) && (i < len)) {
-            addr = investorAt(i);
+            addr = _addressAt(i);
             if (maxWithdrawCoupon(addr) > 0) {
                 pushCoupon(addr);
                 numToPush--;
