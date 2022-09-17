@@ -80,7 +80,7 @@ abstract contract ERC46266DepositEscrow is ERC4626SuiteContext {
     }
 
     function returnAllEscrowedDeposits () public virtual onlyManager {
-        for (uint32 i = 0; i<_deposits.length; i++) {
+        for (uint32 i = 1; i<_deposits.length; i++) {
             require(IERC20(asset()).transfer(_deposits[i].caller, _deposits[i].assets), "returnAllEscrowedDeposits: transfer failed");
             emit depositReturnedEvent(_deposits[i].caller, _deposits[i].assets);
         }
@@ -102,6 +102,14 @@ abstract contract ERC46266DepositEscrow is ERC4626SuiteContext {
 
         emit Deposit(_deposits[index].caller, _deposits[index].receiver, amount, shares);
         return shares;
+    }
+
+    function acceptEscrowedAmount(uint256 amount) public virtual onlyManager {
+        require(amount < totalDepositsEscrowed, "acceptEscrowedAmount: not enough deposits");
+        uint256 totEscrow = totalDepositsEscrowed; // totalDepositsEscrowed gets modified in the loop below
+        for (uint32 i = 1; i<_deposits.length; i++) {
+            acceptEscrowedDeposit(_deposits[i].caller, _deposits[i].assets.mulDiv(amount, totEscrow));
+        }
     }
 
     // use this in totalAssets() instead of asset.balanceOf(this)
