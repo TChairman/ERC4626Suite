@@ -21,7 +21,7 @@ abstract contract ERC4626SuiteContext is ERC4626 {
         _;
     }
 
-    // can be overridden by child contracts to reserve assets
+    // can be overridden by child contracts to reserve assets owned by contract for liabilities
     function availableAssets() public virtual view returns (uint256) {
         return IERC20(asset()).balanceOf(address(this));
     }
@@ -33,6 +33,14 @@ abstract contract ERC4626SuiteContext is ERC4626 {
 
     function totalAssets() public view virtual override returns (uint256) {
         return availableAssets() + totalNAV();
+    }
+
+    function totalLiabilities() public view virtual returns (uint256) {
+        return 0;
+    }
+
+    function totalEquity() public view virtual returns (uint256) {
+        return totalAssets() - totalLiabilities();
     }
 
     // put in some useful hooks for fees and other things
