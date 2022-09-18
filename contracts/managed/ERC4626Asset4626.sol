@@ -29,7 +29,7 @@ abstract contract ERC4626Asset4626 is ERC4626AssetBase {
     function depositERC4626(ERC4626 _vault, uint256 _assets) public virtual onlyManager returns (uint256 _shares) {
         require(_vault.asset() == asset(), "Investment asset does not match vault");
         _shares = _vault.deposit(_assets, address(this));
-        if (!createAsset(ERC4626_ASSET, address(_vault), 0, _assets, 0)) {
+        if (!createAsset(ERC4626_ASSET, address(_vault), 0, _assets, _assets, 0)) {
             updateNAV(address(_vault), 0);
         }
     }

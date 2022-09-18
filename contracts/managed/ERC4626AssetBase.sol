@@ -84,7 +84,7 @@ abstract contract ERC4626AssetBase is ERC4626SuiteContext {
 
     function deleteAsset(bytes32 _assetType, address _assetAddress, uint256 _assetReference) public virtual onlyManager {
         uint32 index = assetIndex(_assetAddress, _assetReference);
-        require(index > 0 && index < assetList.length, "Index out of range");
+        require(index > 0, "deleteAsset: asset not found");
         if (assetList[index].netValue > 0) setNAVindex(index, 0);
         if (assetList[index].expectedReturnBPS > 0) setExpectedReturnBPSindex(index, 0);
 
