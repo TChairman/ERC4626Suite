@@ -35,7 +35,7 @@ abstract contract ERC4626Redemption is ERC4626SuiteContext {
     // Manager Functions
 
     // Distribute a redemption proportionally to all investors
-    function distributeRedemption (uint256 _shares, uint256 _assets) public virtual onlyManager {
+    function distributeRedemption (uint256 _assets, uint256 _shares) public virtual onlyManager {
         _assets = _reserveRedemptionPenalty(_assets);
         require(availableAssets() >= _assets, "distributeRedemption: not enough assets");
         uint256 availSup = totalSupply();
