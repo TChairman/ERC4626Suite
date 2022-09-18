@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
 import "./ERC4626AssetBase.sol";
-import "../redemption/ERC4626Tranche.sol";
+import "../liabilities/ERC4626Tranche.sol"; // TODO: replace with interface
 
 /// @notice Support for ERC4626 tranche investments
 /// @notice Manager decides when and how much to invest in the tranche, and periodically sweeps coupons and distributions

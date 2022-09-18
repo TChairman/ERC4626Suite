@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-import "../fees/ERC4626Fee.sol";
+import "../liabilities/ERC4626Fee.sol";
 
 /// @notice Vault instantiation for testing
 

@@ -2,8 +2,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-import "./ERC4626Coupon.sol"; 
-import "./ERC4626Redemption.sol"; 
+import "../equity/ERC4626Coupon.sol"; 
+import "../equity//ERC4626Redemption.sol"; 
 
 /// @notice Implement tranches from the vault side
 /// @notice influenced by a ERC4626 multi-vault standard, something like this: https://github.com/superform-xyz/experimental-4626/blob/main/contracts/MultiVault.sol

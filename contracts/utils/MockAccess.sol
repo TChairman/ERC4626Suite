@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-import "../access/ERC4626Access.sol";
+import "../equity/ERC4626Access.sol";
 
 /// @notice Vault instantiation for testing
 

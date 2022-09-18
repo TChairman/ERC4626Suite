@@ -2,12 +2,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 /// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
 
-import "../fees/ERC4626Fee.sol";
-import "../access/ERC4626Access.sol";
-import "../access/ERC4626Force.sol";
-import "./ERC4626Asset4626.sol";
-import "./ERC4626AssetOffChain.sol";
-
+import "../liabilities/ERC4626Fee.sol";
+import "../equity/ERC4626Access.sol";
+import "../equity/ERC4626Force.sol";
+import "../assets/ERC4626Asset4626.sol";
+import "../assets/ERC4626AssetOffChain.sol";
 
 /// @notice Index Fund vault for ERC4626 investments. Manager decides when to invest/divest in any ERC4626 vault.
 /// @notice Gains are not computed until investments are updated, either by an investment, or a call to updateAssetValue.
