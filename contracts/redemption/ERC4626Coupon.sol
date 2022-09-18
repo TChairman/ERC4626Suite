@@ -39,6 +39,7 @@ abstract contract ERC4626Coupon is ERC4626SuiteContext {
     }
 
     function withdrawCoupon (uint256 _amount, address _receiver, address _owner) public virtual returns (uint256) {
+        require (_msgSender() == _owner, "withdrawCoupon: not owner");
         uint256 avail = maxWithdrawCoupon(_owner);
         if (_amount > avail) _amount = avail;
         _coupons[_owner].lastTotalCoupon = totalCouponPaid;
