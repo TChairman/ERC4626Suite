@@ -40,7 +40,10 @@ abstract contract ERC4626SuiteContext is ERC4626 {
     }
 
     function totalEquity() public view virtual returns (uint256) {
-        return totalAssets() - totalLiabilities();
+        uint256 totAssets = totalAssets();
+        uint256 totLiabs = totalLiabilities();
+        if (totLiabs > totAssets) totLiabs = totAssets;
+        return totAssets - totLiabs;
     }
 
     // put in some useful hooks for fees and other things
