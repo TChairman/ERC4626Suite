@@ -11,7 +11,7 @@ import "../ERC4626SuiteContext.sol";
 /// @notice also be reclaimed before the manager accepts them.
 /// @notice maxMint returns 0, and as a result calls to mint() will revert, as the share price may change between deposit and acceptance.
 
-abstract contract ERC46266DepositEscrow is ERC4626SuiteContext {
+abstract contract ERC4626DepositEscrow is ERC4626SuiteContext {
     using Math for uint256;
 
     uint32 constant MAX_ESCROWED_DEPOSITS = type(uint32).max;
