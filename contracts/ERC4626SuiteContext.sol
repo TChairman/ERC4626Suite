@@ -21,17 +21,18 @@ abstract contract ERC4626SuiteContext is ERC4626 {
         _;
     }
 
-    // can be overridden by child contracts to reserve assets owned by contract for liabilities
+    // available assets should be actual liquid assets that are not reserved for something else
     function availableAssets() public virtual view returns (uint256) {
         return IERC20(asset()).balanceOf(address(this));
     }
 
-     // override this for asset values instead of re-implementing totalAssets()
+     // use this for asset value of investments
     function totalNAV() public virtual view returns (uint256) {
         return 0;
     }
 
-    function totalAssets() public view virtual override returns (uint256) {
+    // should be totalAssets, but that's taken by ERC4626 for equity value
+    function actualAssets() public view virtual returns (uint256) {
         return availableAssets() + totalNAV();
     }
 
@@ -39,11 +40,13 @@ abstract contract ERC4626SuiteContext is ERC4626 {
         return 0;
     }
 
-    function totalEquity() public view virtual returns (uint256) {
-        uint256 totAssets = totalAssets();
+    // I consider this a naming bug in ERC4626 - totalAssets should actually be totalEquity, because equity = assets - liabilities
+    // but for backwards compatibility, we are keeping the name
+    function totalAssets() public view virtual override returns (uint256) {
+        uint256 actAssets = actualAssets();
         uint256 totLiabs = totalLiabilities();
-        if (totLiabs > totAssets) totLiabs = totAssets;
-        return totAssets - totLiabs;
+        if (totLiabs > actAssets) totLiabs = actAssets;
+        return actAssets - totLiabs;
     }
 
     // put in some useful hooks for fees and other things

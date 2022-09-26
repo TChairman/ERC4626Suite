@@ -70,8 +70,11 @@ contract ERC4626IndexFund is ERC4626Asset4626, ERC4626AssetOffChain, ERC4626Fee,
       return super.withdraw(assets, receiver, owner);
     }
 
-    function totalAssets() public view virtual override(ERC4626SuiteContext, ERC4626Fee) returns (uint256) {
-      return super.totalAssets();
+    function actualAssets() public view virtual override(ERC4626SuiteContext, ERC4626Fee) returns (uint256) {
+      return super.actualAssets();
+    }    
+    function totalLiabilities() public view virtual override(ERC4626SuiteContext, ERC4626Fee) returns (uint256) {
+      return super.totalLiabilities();
     }
     function maxDeposit(address owner) public view virtual override(ERC4626, ERC4626Access) returns (uint256) {
         return super.maxDeposit(owner);

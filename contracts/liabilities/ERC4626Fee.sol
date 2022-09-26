@@ -46,16 +46,16 @@ abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
         disableFeeAdvance = _disableFeeAdvance;
     }
 
-    function totalAssets() public view virtual override returns (uint256 assets) {
+    function actualAssets() public view virtual override returns (uint256 assets) {
         int256 fees = totalAccruedFees();
-        assets = super.totalAssets();
-        if (fees < 0) {
-            assets += uint256(-fees);
-        } else if (assets < uint256(fees)) {
-            assets -= uint256(fees);
-        } else {
-            assets = 0;
-        }
+        assets = super.actualAssets();
+        if (fees > 0) assets += uint256(-fees);
+    }
+
+    function totalLiabilities() public view virtual override returns (uint256 liabs) {
+        int256 fees = totalAccruedFees();
+        liabs = super.totalLiabilities();
+        if (fees < 0) liabs += uint256(fees);
     }
 
     function accrueFee(int256 fee) internal virtual {
@@ -99,6 +99,7 @@ abstract contract ERC4626Fee is ERC4626SuiteContext, ERC4626ProtocolFeeConfig {
     }
 
     // seems a little silly, but important for accounting
+    // fee repaid stays accrued, call recordDiscretionaryFee with a negative amount to return to LPs
     function repayFee (address from, uint256 amount) public virtual onlyManager {
         require(IERC20(asset()).transferFrom(from, address(this), amount), "repayFee: Transfer failed");
         accrueFee(toInt256(amount));
