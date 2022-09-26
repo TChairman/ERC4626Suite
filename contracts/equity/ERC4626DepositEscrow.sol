@@ -34,9 +34,12 @@ abstract contract ERC4626DepositEscrow is ERC4626SuiteContext {
         _deposits.push(depositType(address(0), address(0), 0)); // guard entry in deposits array
     }
 
+    function isDepositMintAllowed(address owner) public view virtual returns (bool);
+
     function deposit(uint256 assets, address receiver) public virtual override returns (uint256) {
         require(assets <= maxDeposit(receiver), "ERC4626: deposit more than max");
         address sender = _msgSender();
+        require(isDepositMintAllowed(sender), "deposit: not allowed");
         require(IERC20(asset()).transferFrom(sender, address(this), assets), "deposit: transfer failed");
         uint32 index = _depositIndex[sender];
         if (index == 0) {
