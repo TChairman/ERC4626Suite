@@ -28,6 +28,7 @@ abstract contract ERC4626Tranche is ERC4626Coupon, ERC4626Redemption {
         uint256 principalEscrowed;
         bool rapidAmortization;
         bool guaranteedRate;
+        bool autoAccept;
     }
     trancheStruct[] _tranches;
     mapping (address => uint32) _trancheIndex;
@@ -42,16 +43,16 @@ abstract contract ERC4626Tranche is ERC4626Coupon, ERC4626Redemption {
 
     constructor() {
         // push guard tranche, as tranche 0 is equity
-        _tranches.push(trancheStruct(address(0), 10000, 0, 0, 0, 0, 0, 0, 0, 0, false, false));
+        _tranches.push(trancheStruct(address(0), 10000, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false));
     }
 
     // Manager Functions - create tranche, set owner, accept deposits, waterfall coupons and repay principal
 
     // tranches are created in order of seniority, most senior first
-    function createTranche(address _owner, uint32 _LTVmax, uint256 _minCoverage, uint256 _maxSize, uint256 _rateBPS, bool _guaranteedRate) public virtual onlyManager returns (uint256 trancheID) {
+    function createTranche(address _owner, uint32 _LTVmax, uint256 _minCoverage, uint256 _maxSize, uint256 _rateBPS, bool _guaranteedRate, bool _autoAccept) public virtual onlyManager returns (uint256 trancheID) {
         trancheID = _tranches.length;
         require(trancheID <= MAX_TRANCHES, "createTranche: exceeded max tranches");
-        _tranches.push(trancheStruct(_owner, _LTVmax, _minCoverage, _maxSize, 0, _rateBPS, 0, 0, 0, 0, false, _guaranteedRate));
+        _tranches.push(trancheStruct(_owner, _LTVmax, _minCoverage, _maxSize, 0, _rateBPS, 0, 0, 0, 0, false, _guaranteedRate, _autoAccept));
     }
 
     function setVaultOwner(uint256 _vaultID, address _owner) public virtual onlyManager {
@@ -60,6 +61,10 @@ abstract contract ERC4626Tranche is ERC4626Coupon, ERC4626Redemption {
     }
 
     function acceptTranche(uint256 _vaultID, uint256 _amount) public virtual onlyManager {
+        _acceptTranche(_vaultID, _amount);
+    }
+
+    function _acceptTranche(uint256 _vaultID, uint256 _amount) internal virtual {
         require(_vaultID > 0 && _vaultID < _tranches.length, "acceptTranche: invalid vault ID");
         if (_amount > _tranches[_vaultID].principalEscrowed) _amount = _tranches[_vaultID].principalEscrowed;
         _updateAccruedCoupon(_vaultID);
@@ -201,6 +206,7 @@ abstract contract ERC4626Tranche is ERC4626Coupon, ERC4626Redemption {
         require(IERC20(asset()).transferFrom(sender, address(this), _amount), "deposit: transfer failed");
         _tranches[_vaultID].principalEscrowed += _amount;
         tranchePrincipalReserved += _amount;
+        if (_tranches[_vaultID].autoAccept) _acceptTranche(_vaultID, _amount);
         return _amount;
     }
 
