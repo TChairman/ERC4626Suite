@@ -3,6 +3,7 @@ Rewrite Fee, simplify and separate Carry/basis calcs
 Fund types - both for test and for real (see below)
 GitBook Documentation, including order of inclusion diagram
 Tests
+Organize functions within files around manager, investor, lender, helper
 Do EIP165 identification
 Linting and pretty-printing
 Gas optimization
@@ -75,9 +76,10 @@ Flexible portfolio
 Need philosophy on:
 When amounts should be reduced to max vs when it should revert - fill or kill
 Pull vs push
+Reserved assets
 Multi-Vault and debt-vault
 Assets - Liabilities = Equity
-Event naming and frequency
+Event naming and frequency - every mutable transaction?
 Allowing non-owners to deposit - subject to some sort of griefing?
 Should withdraw(0) revert or just transfer 0?
 par value vs net asset value concept for both equity and debt
@@ -174,6 +176,12 @@ In-between multi portfolio where it's only one currency and set of assets, but d
 Basically use part of the API, but simplify to tranches
 Remember NAV is different from par value (principal due). Par value is shares balanceOf, maybe? NAV is previewRedeem?
 
+ERC 4626 Multi:
+Lots of folks (find references) have talked about multi-vaults and potential extensions to the standard. Would be great to standardize at some point, but following the lead of OpenZeppelin, might be just an accepted methodology instead of a standard.
+Add uint256 vaultID to every standard call in ERC4626. Also steal balanceOf and transfer from ERC1155. Use uint256 because it can encode lots of things: a simple ID, a byyes32 string identifier, an address of a token, or even a hash of a token and an ID for multiple vaults with the same underlying asset.
+Here's an implementation, here's mine (see tranches).
+
+ERC 4626 Debt:
 How to adapt ERC4626 to represent a loan or set of loans:
 deposit() and mint() do the same thing, shares are always equal to principal remaining to be repaid in assets
 balanceOf() gives you the principal remaining (par value if it's a bond or bullet loan)
