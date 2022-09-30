@@ -19,10 +19,8 @@ Check interaction of fees and redemptions
 Carry fees likely must be able to override redemptions - fees maybe should always come last in the list?
 Check handling of declining asset value on coupon repayments to senior tranches
 AutoAcceptEquityDeposits = true; Also enable for individual investors?
-AutoAcceptTrancheDeposits = true;
 Can tranche owner (vault) update to new owner?
 Allow coupon updating and withdrawing "as of" date, to get periods more exact
-In capital calls, prevent deposits from anyone not already in the investor list
 Closing fund = issue redemption(max), potentially push coupons and force redeem if enumerable
 Add function to credit received funds - basically if balance changes unexpectedly, manager can retroactively credit the pushed funds to an asset, otheriwse equity value will briefly pop up - could present an issue if withdrawals are turned on, so maybe eventually keep track of expected asset balanceOf. Hmm.
 Detect if whitelist address is contract and if so set allowance to max: _token.safeApprove(address(_pool), type(uint256).max);
@@ -34,6 +32,10 @@ Might need accruedCarry to handle premature carry paid
 Do the Maple thing, coupon vests over the period to smooth things out
 Repay could specify date as of for compute and setting last, and if zero means block time stamp - use to make periods match nicely 
 Change access to use triggers and not override 
+Hurdle rate for carry on equity 
+Auto reinvest coupons.
+Add LP controls into capital calls. LP can choose pull or push, auto reinvest
+Add an offer premium as counterpart to redemption penalty
 
 Fees rewriting:
 _basis handling in redemptions, transfers

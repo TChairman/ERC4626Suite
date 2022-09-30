@@ -40,8 +40,9 @@ abstract contract ERC4626SuiteContext is ERC4626 {
         return 0;
     }
 
-    // I consider this a naming bug in ERC4626 - totalAssets should actually be totalEquity, because equity = assets - liabilities
-    // but for backwards compatibility, we are keeping the name
+    // I consider this a naming bug in ERC4626 - totalAssets should actually be totalEquity or netAssets, because it is used for share price conversion
+    // equity = total assets - total liabilities, share price should be based on equity (net asset) value, not total assets
+    // but for backwards compatibility with ERC4626, we are keeping the name, and using actualAssets for total assets
     function totalAssets() public view virtual override returns (uint256) {
         uint256 actAssets = actualAssets();
         uint256 totLiabs = totalLiabilities();
