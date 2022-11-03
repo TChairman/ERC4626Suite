@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
-/// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
+/// @author The Chairman (https://github.com/TChairman/ERC4626Suite)
 
 /// @notice ERC4626 Router that implements Goldfinch KYC and accredited restrictions (UID 1). ERC4626 vaults can allow list this router to enable all Goldfinch KYC UIDs to transact.
 

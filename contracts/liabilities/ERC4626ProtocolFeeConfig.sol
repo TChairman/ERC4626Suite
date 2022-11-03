@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
-/// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
+/// @author The Chairman (https://github.com/TChairman/ERC4626Suite)
 
 /// @notice ERC4626 configuration for protocol fees, which can be taken as any of fee types: annual, carry, or withdraw
 

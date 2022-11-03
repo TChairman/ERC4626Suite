@@ -42,13 +42,13 @@ Any frontends may need to be adjusted to call the router for deposits, mints, an
 
 ## ERC4626 Force
 
-Many jurisdictions require the ability to force the transfer or redemption of shares, for a variety of reasons. This extension gives the manager the ability to force transfer or force redeem individual investors. Most likely used in conjunction with [ERC4626Enumerable](https://github.com/tomshields/ERC4626Suite/tree/main/contracts) to keep track of the investors. 
+Many jurisdictions require the ability to force the transfer or redemption of shares, for a variety of reasons. This extension gives the manager the ability to force transfer or force redeem individual investors. Most likely used in conjunction with [ERC4626Enumerable](https://github.com/TChairman/ERC4626Suite/tree/main/contracts) to keep track of the investors. 
 
 # Known Routers
 
 | Provider | ENS | Address | Status |
 |---|---|---|---|
-| Tom Shields | tomfriends.4626access.eth | coming soon | Friends of Tom allowlist |
+| The Chairman | tcfriends.4626access.eth | coming soon | Friends of TC allowlist |
 | [Goldfinch US Accredited](https://docs.goldfinch.finance/goldfinch/unique-identity-uid/for-developers) | goldfinchUID1.4626access.eth | coming soon | unaffiliated with Goldfinch
 
 # Access Router Implementation

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
-/// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
+/// @author The Chairman (https://github.com/TChairman/ERC4626Suite)
 
 /// @notice This architecture is influenced by https://github.com/fei-protocol/ERC4626/blob/main/src/ERC4626RouterBase.sol
 /// @notice Mainly implemented isAllowed() in mint() and deposit(). Transfer functions are also overridden for access control.

@@ -28,5 +28,5 @@ These contracts offer complete implementations of a vault. As such, they can be 
 
 | Provider | ENS | Address | Status |
 |---|---|---|---|
-| Tom Shields | v1.indexfund.4626factory.eth | coming soon | Index Fund factory |
-| Tom Shields | v1.managedfund.4626factory.eth | coming soon | Managed Fund factory |
+| The Chairman | v1.indexfund.4626factory.eth | coming soon | Index Fund factory |
+| The Chairman | v1.managedfund.4626factory.eth | coming soon | Managed Fund factory |

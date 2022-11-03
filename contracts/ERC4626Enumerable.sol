@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
-/// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
+/// @author The Chairman (https://github.com/TChairman/ERC4626Suite)
 
 /// @notice an enumerable version of ERC4626 to keep a list of investor wallets. Important for regulations in some jurisdictions.
 /// @notice makes the list private by default, add public getters if you want front-ends to access

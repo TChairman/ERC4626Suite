@@ -3,32 +3,32 @@
 A full-featured and composable suite of vaults and extensions built on the [ERC4626](https://erc4626.info) standard.
 
 ## Pre-set Vaults
-* [Index Fund](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/presets) is a fund specifically for investing in other ERC4626 vaults under manager discretion.
-* [Managed](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/presets) vaults include both ERC4626 and off-chain investments.
-* [Debt Fund](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/presets) is a fund that pays coupons separately from investment gains.
-* [Structured Credit Fund](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/presets) a full structured credit fund with tranches, redemptions, and more.
+* [Index Fund](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/presets) is a fund specifically for investing in other ERC4626 vaults under manager discretion.
+* [Managed](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/presets) vaults include both ERC4626 and off-chain investments.
+* [Debt Fund](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/presets) is a fund that pays coupons separately from investment gains.
+* [Structured Credit Fund](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/presets) a full structured credit fund with tranches, redemptions, and more.
 * More examples for testing in `utils`.
 
 ## Extensions
 `Assets - Liaiblities = Equity`
 
 ### Equity
-* [Acccess controls](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/equity) include local and global whitelists, integration with popular KYC standards, forced transfers and redemptions, and global enabling and disabling of deposits, withdraws, and transfers
-* [Coupons](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/equity) are a way to pay interest and dividends without requiring redemption of underlying shares. This is important for debt funds, where interest is often paid periodically but withdrawals of principal may be restricted for the life fo the fund. Includes optional ability to push (airdrop) coupons directly to owner wallets.
-* [Redemptions](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/equity) provide managers with the ability to create early liquidity, both for individual investors and the entire fund. While there are many ways that redemptions work, this extension provide the framework for managers to specify them and investors to claim them, giving the foundation that front ends can use to manage things like registering interest for redemptions and proportioning out redemption amounts.
-* [Deposit Escrow](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/equity) allows managers to control the receipt of deposits, useful for closing a number of investors all at once. This is also the basis for Capital Calls.
-* [Capital Calls](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/equity) managers can set investor commitments, and call a % of the commitment, with the ability to penalize late investors.
-* [Enumerability](https://github.com/tomshields/ERC4626Suite/tree/main/contracts) keeps an on-chain list of investor wallets, which ERC4626 does not have by default. This is important for things like coupon airdrops, or regulatory compliance.
+* [Acccess controls](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/equity) include local and global whitelists, integration with popular KYC standards, forced transfers and redemptions, and global enabling and disabling of deposits, withdraws, and transfers
+* [Coupons](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/equity) are a way to pay interest and dividends without requiring redemption of underlying shares. This is important for debt funds, where interest is often paid periodically but withdrawals of principal may be restricted for the life fo the fund. Includes optional ability to push (airdrop) coupons directly to owner wallets.
+* [Redemptions](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/equity) provide managers with the ability to create early liquidity, both for individual investors and the entire fund. While there are many ways that redemptions work, this extension provide the framework for managers to specify them and investors to claim them, giving the foundation that front ends can use to manage things like registering interest for redemptions and proportioning out redemption amounts.
+* [Deposit Escrow](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/equity) allows managers to control the receipt of deposits, useful for closing a number of investors all at once. This is also the basis for Capital Calls.
+* [Capital Calls](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/equity) managers can set investor commitments, and call a % of the commitment, with the ability to penalize late investors.
+* [Enumerability](https://github.com/TChairman/ERC4626Suite/tree/main/contracts) keeps an on-chain list of investor wallets, which ERC4626 does not have by default. This is important for things like coupon airdrops, or regulatory compliance.
 
 ### Assets
-* [Asset Base](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/assets) base support for keeping track of assets, updating values and managing expected returns.
-* [ERC4626 Investments](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/assets) support for investing in other ERC4626 vaults.
-* [Off-Chain Investments](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/assets) support for keeping track of off-chain equity and debt investments.
-* [Fixed Interest-only Loans](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/assets) support for investing in [TrueFi](https://truefi.io/) fixed interest-only loans.
+* [Asset Base](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/assets) base support for keeping track of assets, updating values and managing expected returns.
+* [ERC4626 Investments](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/assets) support for investing in other ERC4626 vaults.
+* [Off-Chain Investments](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/assets) support for keeping track of off-chain equity and debt investments.
+* [Fixed Interest-only Loans](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/assets) support for investing in [TrueFi](https://truefi.io/) fixed interest-only loans.
 
 ### Liabilities
-* [Fee calculations](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/liabiltiies) include annual fees, withdraw fees, and carry on gains, as well as simple one-time expenses. Fees can be accrued and advanced.
-* [Tranches](https://github.com/tomshields/ERC4626Suite/tree/main/contracts/liabilities) allow managers to accept lower-risk capital higher on the stack. Tranches are protected by the equity first-loss capital, and generally pay a lower rate of return.
+* [Fee calculations](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/liabiltiies) include annual fees, withdraw fees, and carry on gains, as well as simple one-time expenses. Fees can be accrued and advanced.
+* [Tranches](https://github.com/TChairman/ERC4626Suite/tree/main/contracts/liabilities) allow managers to accept lower-risk capital higher on the stack. Tranches are protected by the equity first-loss capital, and generally pay a lower rate of return.
 
 NOT (YET) AUDITED. USE AT YOUR OWN RISK.
 

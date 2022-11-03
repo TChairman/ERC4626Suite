@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
-/// @author Tom Shields (https://github.com/tomshields/ERC4626Suite)
+/// @author The Chairman (https://github.com/TChairman/ERC4626Suite)
 
 /// @notice ERC4626 vault that allows an admin to selectively enable deposits and withdrawals for individual investors
 /// @notice Very powerful when used in conjunction with Access Routers.
